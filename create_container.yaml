@@ -3,10 +3,12 @@
   connection: local
   #become: true
   tasks:
+    - name: run echo
+      shell: echo 'shubham'
     - name: creating a container
       docker_container:
         name: mydockeransibleproj
-        image: shubhamrajput11/dockerjenkinsproj:1.0.0
+        image: "shubhamrajput11/dockerjenkinsproj:1.0.0"
         state: started
         published_ports:
           - 0.0.0.0:8080:8080
