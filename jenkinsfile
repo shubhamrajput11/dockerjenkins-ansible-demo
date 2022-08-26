@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven3'
+    }
+
+    stages {
+        stage('SCM') {
+            steps {
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/shubhamrajput11/dockerjenkins-ansible-demo.git'
+            }
+        }
+        stage('Maven build'){
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        stage('docker version'){
+            steps {
+                sh "docker --version"
+            }
+        }
+        stage('Docker Image build'){
+            steps {
+                sh "docker build -t shubhamrajput11/dockerjenkinsproj:1.0.0 ."
+            }
+        }
+        stage('Docker push image'){
+            steps {
+                withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerhub')]) {
+                   sh "docker login -u shubhamrajput11 -p ${dockerhub}"
+                 }
+                
+                sh "docker push shubhamrajput11/dockerjenkinsproj:1.0.0"
+            }
+        }
+        stage('run Docker container'){
+            steps{
+                ansiblePlaybook credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory.ini', playbook: 'create_container.yaml'
+            }
+        }
+    }
+}
